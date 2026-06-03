@@ -1,5 +1,9 @@
 node_modules/
 dist/
+dist2/
 .wrangler/
 *.log
 .DS_Store
+
+# Vite hot-reload temp files
+vite.config.ts.timestamp-*.mjs
