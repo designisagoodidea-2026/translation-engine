@@ -1,0 +1,31 @@
+# Credentials
+.env
+.env.local
+.env.*.local
+
+# Personal drafts and working docs (not part of the shipped artifact —
+# reference Chief of Staff / internal context that stays out of public).
+LINKEDIN_DRAFT.md
+CLAUDE.md
+KICKOFF.md
+REFERENCES.md
+
+# Node
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# Translation outputs (per-pass manifests are not committed by default)
+manifests/*.md
+manifests/*.json
+!manifests/.gitkeep
+!manifests/README.md
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Cowork / Claude
+.claude/

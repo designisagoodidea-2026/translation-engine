@@ -1,0 +1,23 @@
+// vite.config.ts
+import { defineConfig } from "file:///sessions/kind-upbeat-lamport/mnt/Translation%20Engine/prototype/node_modules/vite/dist/node/index.js";
+var vite_config_default = defineConfig({
+  root: ".",
+  build: {
+    outDir: "dist",
+    sourcemap: true,
+    target: "es2022"
+  },
+  server: {
+    port: 5173,
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:8787",
+        changeOrigin: true
+      }
+    }
+  }
+});
+export {
+  vite_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCIvc2Vzc2lvbnMva2luZC11cGJlYXQtbGFtcG9ydC9tbnQvVHJhbnNsYXRpb24gRW5naW5lL3Byb3RvdHlwZVwiO2NvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9maWxlbmFtZSA9IFwiL3Nlc3Npb25zL2tpbmQtdXBiZWF0LWxhbXBvcnQvbW50L1RyYW5zbGF0aW9uIEVuZ2luZS9wcm90b3R5cGUvdml0ZS5jb25maWcudHNcIjtjb25zdCBfX3ZpdGVfaW5qZWN0ZWRfb3JpZ2luYWxfaW1wb3J0X21ldGFfdXJsID0gXCJmaWxlOi8vL3Nlc3Npb25zL2tpbmQtdXBiZWF0LWxhbXBvcnQvbW50L1RyYW5zbGF0aW9uJTIwRW5naW5lL3Byb3RvdHlwZS92aXRlLmNvbmZpZy50c1wiO2ltcG9ydCB7IGRlZmluZUNvbmZpZyB9IGZyb20gJ3ZpdGUnO1xuXG4vLyBWaXRlIHNlcnZlcyB0aGUgU1BBIG9ubHkuIEluIGRldiwgL2FwaSBpcyBwcm94aWVkIHRvIHRoZSBsb2NhbCBXb3JrZXJcbi8vIChydW4gc2VwYXJhdGVseSB2aWEgYG5wbSBydW4gZGV2OndvcmtlcmApLiBJbiBwcm9kdWN0aW9uLCB0aGUgV29ya2VyXG4vLyBzZXJ2ZXMgYm90aCB0aGUgQVBJIGFuZCB0aGUgYnVpbHQgU1BBIGFzc2V0cyBpbiBvbmUgZGVwbG95LlxuZXhwb3J0IGRlZmF1bHQgZGVmaW5lQ29uZmlnKHtcbiAgcm9vdDogJy4nLFxuICBidWlsZDoge1xuICAgIG91dERpcjogJ2Rpc3QnLFxuICAgIHNvdXJjZW1hcDogdHJ1ZSxcbiAgICB0YXJnZXQ6ICdlczIwMjInLFxuICB9LFxuICBzZXJ2ZXI6IHtcbiAgICBwb3J0OiA1MTczLFxuICAgIHByb3h5OiB7XG4gICAgICAnL2FwaSc6IHtcbiAgICAgICAgdGFyZ2V0OiAnaHR0cDovLzEyNy4wLjAuMTo4Nzg3JyxcbiAgICAgICAgY2hhbmdlT3JpZ2luOiB0cnVlLFxuICAgICAgfSxcbiAgICB9LFxuICB9LFxufSk7XG4iXSwKICAibWFwcGluZ3MiOiAiO0FBQThXLFNBQVMsb0JBQW9CO0FBSzNZLElBQU8sc0JBQVEsYUFBYTtBQUFBLEVBQzFCLE1BQU07QUFBQSxFQUNOLE9BQU87QUFBQSxJQUNMLFFBQVE7QUFBQSxJQUNSLFdBQVc7QUFBQSxJQUNYLFFBQVE7QUFBQSxFQUNWO0FBQUEsRUFDQSxRQUFRO0FBQUEsSUFDTixNQUFNO0FBQUEsSUFDTixPQUFPO0FBQUEsTUFDTCxRQUFRO0FBQUEsUUFDTixRQUFRO0FBQUEsUUFDUixjQUFjO0FBQUEsTUFDaEI7QUFBQSxJQUNGO0FBQUEsRUFDRjtBQUNGLENBQUM7IiwKICAibmFtZXMiOiBbXQp9Cg==

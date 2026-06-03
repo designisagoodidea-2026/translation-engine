@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Translation Engine — schema translation for heterogeneous tracking systems</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A schema-translation library for heterogeneous tracking systems used in design and cross-functional work. Each translation pass produces a manifest naming what was preserved, what was lost, and how.">
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --bg-card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6b6862;
+      --accent: #b8543c;
+      --border: #e8e4dd;
+      --code-bg: #f3f0eb;
+
+      --kind-schema: #6f4a8a;
+      --kind-semantic: #a0623a;
+      --kind-hierarchy: #3a679c;
+      --kind-context: #4a7a5c;
+      --kind-provenance: #5a5a5a;
+
+      --kind-schema-bg: #ede5f1;
+      --kind-semantic-bg: #f4e6d6;
+      --kind-hierarchy-bg: #dfe7f2;
+      --kind-context-bg: #dceadd;
+      --kind-provenance-bg: #e8e6e2;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    main {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 72px 24px 96px;
+    }
+
+    header.hero {
+      margin-bottom: 56px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      margin: 0 0 12px;
+    }
+
+    .tagline {
+      font-size: 1.125rem;
+      color: var(--muted);
+      margin: 0;
+      max-width: 56ch;
+    }
+
+    .status {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--code-bg);
+      color: var(--muted);
+    }
+
+    section { margin: 0; }
+    section + section { margin-top: 56px; }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      margin: 0 0 16px;
+    }
+
+    h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+
+    p { margin: 0 0 16px; max-width: 64ch; }
+    p:last-child { margin-bottom: 0; }
+
+    a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+    a:hover { text-decoration-thickness: 2px; }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--code-bg);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    strong { font-weight: 600; }
+
+    ul { padding-left: 22px; margin: 0 0 16px; max-width: 64ch; }
+    li { margin-bottom: 10px; }
+    li:last-child { margin-bottom: 0; }
+
+    /* Five-kind taxonomy ----------------------------------------------- */
+    dl.kinds {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 18px 24px;
+      margin: 24px 0 0;
+      max-width: 760px;
+    }
+    dl.kinds dt { margin: 0; }
+    dl.kinds dd { margin: 0; color: var(--text); }
+
+    .kind-tag {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      line-height: 1.4;
+    }
+    .kind-schema     { color: var(--kind-schema);     background: var(--kind-schema-bg); }
+    .kind-semantic   { color: var(--kind-semantic);   background: var(--kind-semantic-bg); }
+    .kind-hierarchy  { color: var(--kind-hierarchy);  background: var(--kind-hierarchy-bg); }
+    .kind-context    { color: var(--kind-context);    background: var(--kind-context-bg); }
+    .kind-provenance { color: var(--kind-provenance); background: var(--kind-provenance-bg); }
+
+    /* Worked example three-up ------------------------------------------ */
+    .three-up {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    @media (min-width: 940px) {
+      .three-up { grid-template-columns: 1fr 1fr 1fr; align-items: start; }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .card .step {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      line-height: 22px;
+      border-radius: 50%;
+      background: var(--code-bg);
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-align: center;
+      margin-right: 8px;
+      vertical-align: 2px;
+    }
+
+    table.kv {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    table.kv th {
+      text-align: left;
+      font-weight: 500;
+      color: var(--muted);
+      padding: 7px 10px 7px 0;
+      vertical-align: top;
+      width: 38%;
+      font-size: 0.75rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    table.kv td {
+      padding: 7px 0;
+      vertical-align: top;
+      word-break: break-word;
+    }
+    table.kv tr + tr th,
+    table.kv tr + tr td {
+      border-top: 1px solid var(--border);
+    }
+
+    ul.losses {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.875rem;
+    }
+    ul.losses li {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+    }
+    ul.losses li:last-child { border-bottom: none; }
+    ul.losses .kind-tag {
+      margin-right: 8px;
+      font-size: 0.65rem;
+      padding: 2px 8px;
+    }
+    ul.losses .field { font-family: var(--font-mono); font-size: 0.85em; }
+    ul.losses .why {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.85em;
+    }
+
+    .lossless-line {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .lossless-line strong { color: var(--text); }
+
+    /* Airtable-style pills --------------------------------------------- */
+    .pill {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .pill-todo    { background: #ebebe8; color: #4a4a45; }
+    .pill-active  { background: #fbe5b0; color: #6b4a00; }
+    .pill-done    { background: #c9e7c4; color: #2a5a2a; }
+    .pill-highest { background: #f5c8c2; color: #8a2615; }
+    .pill-high    { background: #f6d9c2; color: #8a4a15; }
+    .pill-medium  { background: #fae7a8; color: #6b5400; }
+    .pill-low     { background: #cfddf2; color: #2a4a8a; }
+    .pill-lowest  { background: #e5e5e2; color: #5a5a55; }
+
+    /* Pattern + closing ------------------------------------------------ */
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    @media (min-width: 700px) {
+      .pattern-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .pattern-grid .card h3 {
+      color: var(--text);
+      text-transform: none;
+      letter-spacing: -0.005em;
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    footer {
+      margin-top: 80px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+    footer p { margin: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <!-- HERO -->
+    <header class="hero">
+      <h1>Translation Engine</h1>
+      <p class="tagline">
+        Schema translation for heterogeneous tracking systems used in design
+        and cross-functional work. Every pass produces a manifest naming what
+        was preserved, what was lost, and how.
+      </p>
+      <span class="status">Slice 1 — Jira → Airtable, project management context</span>
+    </header>
+
+    <!-- PROBLEM -->
+    <section>
+      <h2>The problem</h2>
+      <p>
+        Most teams run multiple trackers — Jira for engineering, Airtable for
+        roadmap, Notion for OKRs, Figma comments for design critique. Keeping
+        work in sync between them typically results in some kind of loss in
+        data quality. Priorities mean different things in different systems.
+        Hierarchies flatten. Custom fields evaporate. Context lives in one
+        place and is invisible in the next.
+      </p>
+      <p>
+        Most attempts to bridge these systems either pretend the loss isn't
+        happening or hide it behind one-off engineering work that papers over
+        the gap. Translation Engine takes a different approach: it names the
+        loss explicitly, the same way every time, and ships that naming as
+        the deliverable. The destination write is secondary; the artifact is
+        a record of what survived translation, what didn't, and why.
+      </p>
+    </section>
+
+    <!-- TAXONOMY -->
+    <section>
+      <h2>Five kinds of loss</h2>
+      <p>
+        Every translation decision lands in one of five buckets. The taxonomy
+        is the doctrine — the same five kinds apply whether the pair is Jira
+        and Airtable, Linear and Notion, or any other heterogeneous tracker
+        pair in design and cross-functional work.
+      </p>
+      <dl class="kinds">
+        <dt><span class="kind-tag kind-schema">Schema</span></dt>
+        <dd>
+          This kind of loss happens when a data field in one system has no
+          clear equivalent in the other. Most syncs quietly skip the field
+          and the absence goes unremarked, so the receiving team has no way
+          to know information was missing. Translation Engine names the
+          field explicitly in the manifest so the gap is visible and the
+          field can be wired up in a later pass or grammar revision.
+        </dd>
+
+        <dt><span class="kind-tag kind-semantic">Semantic</span></dt>
+        <dd>
+          Names match across systems, but behavior doesn't. A "High" priority
+          in Jira drives SLA timers, notifications, and project-level
+          reporting; in Airtable the same word is just a label on a
+          single-select field. Most syncs paper over the gap and a receiving
+          team assumes parity. Translation Engine flags the mismatch and
+          names the side effects that didn't make the trip, so anyone reading
+          the manifest can see what behavior they're not getting.
+        </dd>
+
+        <dt><span class="kind-tag kind-hierarchy">Hierarchy</span></dt>
+        <dd>
+          Parent–child and membership relationships flatten in transit. An
+          epic link becomes a text label; a sprint object collapses to its
+          name with dates and state stripped off. A receiving system that
+          doesn't model these relationships absorbs the data anyway and the
+          structure quietly disappears. Translation Engine records what
+          structure existed in the source and what survived to the
+          destination, so the gap is auditable rather than invisible.
+        </dd>
+
+        <dt><span class="kind-tag kind-context">Context</span></dt>
+        <dd>
+          Sometimes the substantive spec lives outside the source system to
+          begin with — a Slack thread, a Notion page, a Figma comment — and
+          the link to it travels but the content behind the link does not. A
+          naive sync moves the URL and the destination viewer assumes the
+          ticket is self-contained. Translation Engine surfaces these
+          embedded references explicitly, so a reader knows up front that
+          the real content lives somewhere else and where to look.
+        </dd>
+
+        <dt><span class="kind-tag kind-provenance">Provenance</span></dt>
+        <dd>
+          Destination rows can end up orphaned from their source — a Jira
+          key dropped during translation, an Airtable record with no trail
+          back. Most syncs treat the new record as the source of truth and
+          break the audit chain. Translation Engine preserves a
+          bidirectional mapping inside the manifest itself, so any
+          destination row can always be traced back to its origin and the
+          two systems stay reconcilable.
+        </dd>
+      </dl>
+    </section>
+
+    <!-- WORKED PASS -->
+    <section>
+      <h2>A worked pass</h2>
+      <p>
+        One Jira issue from a synthetic pet-feeder project, translated through
+        the project-management grammar into an Airtable Roadmap row. The
+        source on the left, the manifest's loss inventory for that issue in
+        the middle, the destination row on the right.
+      </p>
+
+      <div class="three-up">
+        <!-- Source -->
+        <div class="card">
+          <h3><span class="step">1</span>Source — Jira <code>SCRUM-5</code></h3>
+          <table class="kv">
+            <tr><th>Summary</th><td>Bluetooth pairing flow</td></tr>
+            <tr><th>Description</th><td>Spec lives in this Slack thread: <code>acme.slack.com/archives/C0HARDWARE/p17…</code> — pairing should auto-reconnect on app foreground. <em>(stored as ADF)</em></td></tr>
+            <tr><th>Status</th><td>Active</td></tr>
+            <tr><th>Priority</th><td>High</td></tr>
+            <tr><th>Parent</th><td><code>SCRUM-2</code> (Epic: Pet feeder hardware integration)</td></tr>
+            <tr><th>Labels</th><td>hardware</td></tr>
+            <tr><th>Sprint</th><td>Sprint 1 — Demo <em>(object: id, state, start/end dates)</em></td></tr>
+            <tr><th>Fix versions</th><td><code>[ v0.1 ]</code></td></tr>
+          </table>
+        </div>
+
+        <!-- Manifest -->
+        <div class="card">
+          <h3><span class="step">2</span>Manifest — loss inventory</h3>
+          <ul class="losses">
+            <li>
+              <span class="kind-tag kind-semantic">Semantic</span>
+              <span class="field">description→Description</span>
+              <span class="why">Jira stores descriptions as a structured document with formatting, mentions, and embedded actions. Translation flattens that to plain text — the structure does not survive the move.</span>
+            </li>
+            <li>
+              <span class="kind-tag kind-context">Context</span>
+              <span class="field">Slack thread URL in description</span>
+              <span class="why">The URL is preserved in the destination, but the conversation it points to is not. A viewer in Airtable sees a link without the thread behind it and has no way to fetch the spec.</span>
+            </li>
+            <li>
+              <span class="kind-tag kind-semantic">Semantic</span>
+              <span class="field">status→Status</span>
+              <span class="why">"Active" in Jira's workflow is bucketed to "In Progress" in Airtable. The workflow transitions, permissions, and allowed next states behind the source status have no destination equivalent.</span>
+            </li>
+            <li>
+              <span class="kind-tag kind-semantic">Semantic</span>
+              <span class="field">priority→Priority</span>
+              <span class="why">The label "High" maps across, but the SLA timers, notification rules, and reporting behaviors that Jira priority triggers do not. The destination row carries the word without the behavior.</span>
+            </li>
+            <li>
+              <span class="kind-tag kind-hierarchy">Hierarchy</span>
+              <span class="field">parent→Epic</span>
+              <span class="why">The typed link to <code>SCRUM-2</code> is flattened to the epic's name as text. Navigation, roll-up tracking, and child-completion behavior in Jira do not have an equivalent in the destination.</span>
+            </li>
+            <li>
+              <span class="kind-tag kind-hierarchy">Hierarchy</span>
+              <span class="field">sprint→Sprint</span>
+              <span class="why">The Jira sprint object — name, state, start and end dates, completion date — collapses to a single string in Airtable. Multi-sprint membership and the time window are dropped.</span>
+            </li>
+            <li>
+              <span class="kind-tag kind-hierarchy">Hierarchy</span>
+              <span class="field">fixVersions→Fix Version</span>
+              <span class="why">The array of version objects in Jira is joined by commas into one text field. Release dates and release status do not survive.</span>
+            </li>
+          </ul>
+          <p class="lossless-line">
+            <strong>Mapped 1:1:</strong>
+            <code>summary→Name</code>, <code>labels→Labels</code>,
+            <code>key→Jira Key</code> (preserved via the manifest's
+            bidirectional ID mapping).
+          </p>
+        </div>
+
+        <!-- Destination -->
+        <div class="card">
+          <h3><span class="step">3</span>Destination — Airtable Roadmap row</h3>
+          <table class="kv">
+            <tr><th>Name</th><td>Bluetooth pairing flow</td></tr>
+            <tr><th>Description</th><td>Spec lives in this Slack thread: <code>acme.slack.com/archives/C0HARDWARE/p17…</code> — pairing should auto-reconnect on app foreground.</td></tr>
+            <tr><th>Status</th><td><span class="pill pill-active">In Progress</span></td></tr>
+            <tr><th>Priority</th><td><span class="pill pill-high">High</span></td></tr>
+            <tr><th>Epic</th><td>Pet feeder hardware integration</td></tr>
+            <tr><th>Labels</th><td><span class="pill pill-lowest">hardware</span></td></tr>
+            <tr><th>Sprint</th><td>Sprint 1 — Demo</td></tr>
+            <tr><th>Fix Version</th><td>v0.1</td></tr>
+            <tr><th>Jira Key</th><td><code>SCRUM-5</code></td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PATTERN -->
+    <section>
+      <h2>The pattern</h2>
+      <p>
+        Two composable layers carry the work, and the file-system shape
+        matches one-to-one.
+      </p>
+      <div class="pattern-grid">
+        <div class="card">
+          <h3>Per-platform adapters</h3>
+          <p>
+            Typed clients for each system — <code>jira.ts</code>,
+            <code>airtable.ts</code>. Auth, HTTP plumbing, env access, and
+            error formatting live in a shared <code>lib/</code>, so adding a
+            new platform is one adapter file with zero new plumbing.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Per-context grammars</h3>
+          <p>
+            Opinionated translation rules for one work-context —
+            <code>project-management.ts</code> here. Adding a new context
+            (design system operations, critique rituals, roadmapping
+            prioritization) is one grammar file. Each is deliberately
+            opinionated, not configuration.
+          </p>
+        </div>
+      </div>
+      <p style="margin-top: 24px;">
+        Every pass is a discrete snapshot, not a continuous sync. The manifest
+        is the deliverable; the destination write is secondary. That order
+        forces every translation decision to be named before it's executed.
+      </p>
+    </section>
+
+    <!-- WHAT THIS ISN'T -->
+    <section>
+      <h2>What this isn't</h2>
+      <ul>
+        <li>
+          <strong>Not a sync product.</strong> Each pass is a snapshot. No
+          webhooks, no continuous mirroring. Webhooks are a later slice if
+          they're needed at all.
+        </li>
+        <li>
+          <strong>Not a generic schema translator.</strong> Per-context
+          grammars are opinionated by design. Adding a new context is a
+          deliberate scoping pass, not configuration.
+        </li>
+        <li>
+          <strong>Not a hosted service.</strong> A TypeScript library plus
+          this demo. Run it yourself, against your own systems, on your own
+          terms.
+        </li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>
+        Translation Engine — built by Jason Armstrong.
+        Source on <a href="https://github.com/designisagoodidea/translation-engine">GitHub</a>.
+      </p>
+    </footer>
+  </main>
+</body>
+</html>

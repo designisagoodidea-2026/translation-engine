@@ -1,0 +1,18 @@
+# Cloudflare Workers config for the Translation Engine prototype.
+#
+# The Worker serves both the API (/api/*) and the built SPA assets.
+# Run `npm run build` first to produce dist/ before deploying.
+
+name = "translation-engine-prototype"
+main = "worker/index.ts"
+compatibility_date = "2026-05-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+# Local dev runs on 8787 by default (proxy target in vite.config.ts).
+[dev]
+port = 8787

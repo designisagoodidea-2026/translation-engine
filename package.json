@@ -1,0 +1,27 @@
+{
+  "name": "translation-engine",
+  "version": "0.1.0",
+  "description": "Schema-translation library for heterogeneous tracking systems (design + cross-functional).",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "smoke:jira": "tsx src/scripts/smoke-jira.ts",
+    "smoke:airtable": "tsx src/scripts/smoke-airtable.ts",
+    "seed:jira": "tsx src/scripts/seed-jira.ts",
+    "fix:statuses": "tsx src/scripts/fix-statuses.ts",
+    "translate": "tsx src/scripts/translate.ts",
+    "wipe:airtable": "tsx src/scripts/wipe-airtable.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
