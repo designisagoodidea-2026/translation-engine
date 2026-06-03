@@ -528,7 +528,7 @@ function renderFooter(): string {
     <footer>
       Translation Engine prototype — built by Jason Armstrong.
       <a href="/demo/">Static doctrine demo</a> ·
-      Source on <a href="https://github.com/designisagoodidea/translation-engine">GitHub</a>.
+      Source on <a href="https://github.com/designisagoodidea-2026/translation-engine">GitHub</a>.
     </footer>
   `;
 }

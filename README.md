@@ -4,7 +4,7 @@
 > cross-functional work. Every pass produces a manifest naming what was
 > preserved, what was lost, and how.
 
-**Live demo:** [`demo/index.html`](demo/index.html) — or visit the [GitHub Pages site](https://designisagoodidea.github.io/translation-engine/demo/) once it's live.
+**Live demo:** [`demo/index.html`](demo/index.html) — or visit the [GitHub Pages site](https://designisagoodidea-2026.github.io/translation-engine/demo/) once it's live.
 
 **Status:** Slice 1 — Jira → Airtable, project management context.
 
