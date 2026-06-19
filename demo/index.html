@@ -505,11 +505,15 @@
         <div class="card">
           <h3>Per-context grammars</h3>
           <p>
-            Opinionated translation rules for one work-context —
-            <code>project-management.ts</code> here. Adding a new context
-            (design system operations, critique rituals, roadmapping
-            prioritization) is one grammar file. Each is deliberately
-            opinionated, not configuration.
+            Opinionated translation rules per work-context.
+            <code>project-management.ts</code> and
+            <code>design-system-ops.ts</code> ship with the library — same
+            Jira source, different destination schema, different loss
+            surface (Figma URLs, Storybook URLs, and design-token
+            references become first-class in the DSOps grammar). Adding
+            a new context (critique rituals, roadmapping prioritization)
+            is one grammar file. Each is deliberately opinionated, not
+            configuration.
           </p>
         </div>
       </div>

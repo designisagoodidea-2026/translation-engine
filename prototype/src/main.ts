@@ -15,7 +15,7 @@
 //     mapping into one of the existing options
 
 import './styles.css';
-import { fetchPreview, fetchProposal, fetchState } from './api.js';
+import { fetchPreview, fetchProposal, fetchState, saveDecisions } from './api.js';
 import { esc } from './dom.js';
 import { Store } from './state.js';
 import type {
@@ -45,6 +45,10 @@ interface AppState {
   showCommit: boolean;
   proposals: Record<string, Proposal | null>;
   proposing: Record<string, boolean>;
+  /** Whether the Worker has a KV binding for decision persistence. The SPA
+   *  uses this only to decide whether to show a quiet "Saved" indicator —
+   *  PUTs still happen either way (the Worker no-ops without KV). */
+  persistenceEnabled: boolean;
 }
 
 const store = new Store<AppState>({
@@ -60,7 +64,21 @@ const store = new Store<AppState>({
   showCommit: false,
   proposals: {},
   proposing: {},
+  persistenceEnabled: false,
 });
+
+/**
+ * Best-effort persistence. Failures are logged but do not surface to the
+ * user — the SPA's in-memory state is the source of truth for the session;
+ * persistence is an enhancement.
+ */
+async function persistDecisions(decisions: UserDecisions): Promise<void> {
+  try {
+    await saveDecisions(decisions);
+  } catch (e) {
+    console.warn('decision save failed', e);
+  }
+}
 
 // Per-decision text-input values. Kept outside the Store so typing doesn't
 // trigger a re-render on every keystroke (which would steal focus).
@@ -73,13 +91,17 @@ bootstrap();
 async function bootstrap() {
   try {
     const data: StateResponse = await fetchState();
+    // Prefer persisted decisions over defaults on initial load. The Worker
+    // already merges stored over defaults into `effectiveDecisions`, so the
+    // SPA does not need to redo the merge.
     store.set({
       loading: false,
       pair: data.pair,
       sourceIssues: data.sourceIssues,
       baseline: data.baseline,
       decisionCatalog: data.decisionCatalog,
-      decisions: data.defaultDecisions,
+      decisions: data.effectiveDecisions,
+      persistenceEnabled: data.persistence.enabled,
     });
     await refreshPreview();
   } catch (e) {
@@ -455,10 +477,10 @@ function buildFieldRows(
   }
 
   rows.push({
-    field: 'Jira Key',
+    field: 'Source Key',
     losses: [],
     sourceHtml: `<code>${esc(issue.key)}</code>`,
-    destHtml: `<code>${esc(String(destFields['Jira Key'] ?? issue.key))}</code>`,
+    destHtml: `<code>${esc(String(destFields['Source Key'] ?? issue.key))}</code>`,
   });
 
   return rows;
@@ -550,8 +572,11 @@ function wireEvents() {
       const key = input.dataset.decision as keyof UserDecisions;
       const value = input.value;
       const cur = store.get().decisions!;
-      store.set({ decisions: { ...cur, [key]: value } as UserDecisions });
-      await refreshPreview();
+      const next = { ...cur, [key]: value } as UserDecisions;
+      store.set({ decisions: next });
+      // Re-run the grammar and persist the choice in parallel. Save is
+      // best-effort — UI updates either way.
+      await Promise.all([refreshPreview(), persistDecisions(next)]);
     });
   }
 
@@ -584,8 +609,9 @@ function wireEvents() {
       const key = btn.dataset.key! as keyof UserDecisions;
       const value = btn.dataset.value!;
       const cur = store.get().decisions!;
-      store.set({ decisions: { ...cur, [key]: value } as UserDecisions });
-      await refreshPreview();
+      const next = { ...cur, [key]: value } as UserDecisions;
+      store.set({ decisions: next });
+      await Promise.all([refreshPreview(), persistDecisions(next)]);
     });
   }
 

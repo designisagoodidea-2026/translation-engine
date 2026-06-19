@@ -16,3 +16,21 @@ not_found_handling = "single-page-application"
 # Local dev runs on 8787 by default (proxy target in vite.config.ts).
 [dev]
 port = 8787
+
+# Decision persistence — per system pair, keyed by pair ID.
+# To enable in production:
+#   1. wrangler kv namespace create DECISIONS_KV
+#   2. paste the returned `id` below and uncomment the block
+# Without the binding, /api/decisions is a no-op (UI still works; choices
+# do not persist across Worker invocations).
+# [[kv_namespaces]]
+# binding = "DECISIONS_KV"
+# id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# Scheduled passes — Cloudflare Workers cron triggers.
+# Fires the Worker's `scheduled()` export on the cadence below; the
+# handler then iterates over pairs whose stored frequency
+# (`hourly` / `daily` / `weekly`) matches the current UTC tick.
+# Hourly is a sensible coarse trigger; the per-pair frequency narrows it.
+# [triggers]
+# crons = ["0 * * * *"]

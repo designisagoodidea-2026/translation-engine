@@ -1,0 +1,143 @@
+{
+  "_comment": "Synthetic Asana-shape input for the project-management grammar. Same pet-feeder pretend product as the rest of the public artifact. No live Asana data here. Five PM tasks plus one parent, sized to exercise the loss surface (section status semantics, paired-ownership, custom-field schema loss, embedded Slack URL context loss, parent hierarchy loss).",
+  "tasks": [
+    {
+      "gid": "as-1000",
+      "resource_type": "task",
+      "name": "Mobile app — feed scheduling UX",
+      "memberships": [
+        {
+          "project": { "gid": "proj-001", "name": "Pet Feeder Roadmap" },
+          "section": { "gid": "sec-active", "name": "Active" }
+        }
+      ]
+    },
+    {
+      "gid": "as-1001",
+      "resource_type": "task",
+      "name": "Bluetooth pairing flow",
+      "due_on": "2026-06-30",
+      "assignee": { "gid": "user-aiko-91", "name": "Aiko Tanaka", "resource_type": "user" },
+      "parent": { "gid": "as-1000", "name": "Mobile app — feed scheduling UX", "resource_type": "task" },
+      "html_notes": "<body><p>Owners need to pair the feeder over Bluetooth from the iOS app. The Bluetooth permission prompt is the main UX risk; spec lives in the Slack thread: https://designisagoodidea.slack.com/archives/C0123/p1717000000123456.</p><p>Out of scope for this task: QR fallback (separate task).</p></body>",
+      "memberships": [
+        {
+          "project": { "gid": "proj-001", "name": "Pet Feeder Roadmap" },
+          "section": { "gid": "sec-active", "name": "In Progress" }
+        }
+      ],
+      "tags": [{ "gid": "tag-ios", "name": "ios" }, { "gid": "tag-pairing", "name": "pairing" }],
+      "custom_fields": [
+        {
+          "gid": "cf-prio",
+          "name": "Priority",
+          "type": "enum",
+          "enum_value": { "gid": "prio-high", "name": "High" },
+          "display_value": "High"
+        },
+        {
+          "gid": "cf-seg",
+          "name": "Customer Segment",
+          "type": "enum",
+          "enum_value": { "gid": "seg-mm", "name": "Mid-market" },
+          "display_value": "Mid-market"
+        }
+      ]
+    },
+    {
+      "gid": "as-1002",
+      "resource_type": "task",
+      "name": "Battery telemetry endpoint",
+      "due_on": null,
+      "assignee": { "gid": "user-hiro-04", "name": "Hiro Sato", "resource_type": "user" },
+      "parent": { "gid": "as-1000", "name": "Mobile app — feed scheduling UX", "resource_type": "task" },
+      "html_notes": "<body><p>Surface battery-low signals from the feeder to the owner dashboard. Backend writes the telemetry; mobile reads it.</p></body>",
+      "memberships": [
+        {
+          "project": { "gid": "proj-001", "name": "Pet Feeder Roadmap" },
+          "section": { "gid": "sec-todo", "name": "Up Next" }
+        }
+      ],
+      "tags": [{ "gid": "tag-backend", "name": "backend" }],
+      "custom_fields": [
+        {
+          "gid": "cf-prio",
+          "name": "Priority",
+          "type": "enum",
+          "enum_value": { "gid": "prio-med", "name": "Medium" },
+          "display_value": "Medium"
+        },
+        {
+          "gid": "cf-seg",
+          "name": "Customer Segment",
+          "type": "enum",
+          "enum_value": { "gid": "seg-ent", "name": "Enterprise" },
+          "display_value": "Enterprise"
+        },
+        {
+          "gid": "cf-effort",
+          "name": "Effort (engineer-weeks)",
+          "type": "number",
+          "number_value": 2.5
+        }
+      ]
+    },
+    {
+      "gid": "as-1003",
+      "resource_type": "task",
+      "name": "Schedule editor screen",
+      "due_on": "2026-07-10",
+      "assignee": { "gid": "user-jamie-12", "name": "Jamie Park", "resource_type": "user" },
+      "parent": { "gid": "as-1000", "name": "Mobile app — feed scheduling UX", "resource_type": "task" },
+      "notes": "Owners build a daily feeding schedule from the mobile app. Time + portion grams. SMB customers will see this first.",
+      "memberships": [
+        {
+          "project": { "gid": "proj-001", "name": "Pet Feeder Roadmap" },
+          "section": { "gid": "sec-todo", "name": "Backlog" }
+        }
+      ],
+      "tags": [{ "gid": "tag-ios", "name": "ios" }],
+      "custom_fields": [
+        {
+          "gid": "cf-prio",
+          "name": "Priority",
+          "type": "enum",
+          "enum_value": { "gid": "prio-med", "name": "Medium" },
+          "display_value": "Medium"
+        },
+        {
+          "gid": "cf-seg",
+          "name": "Customer Segment",
+          "type": "enum",
+          "enum_value": { "gid": "seg-smb", "name": "SMB" },
+          "display_value": "SMB"
+        }
+      ]
+    },
+    {
+      "gid": "as-1004",
+      "resource_type": "task",
+      "name": "Missed-feed anomaly detector",
+      "due_on": null,
+      "assignee": { "gid": "user-hiro-04", "name": "Hiro Sato", "resource_type": "user" },
+      "parent": null,
+      "html_notes": "<body><p>Detect when a scheduled feed didn't fire and surface to the owner dashboard with a configurable threshold.</p></body>",
+      "memberships": [
+        {
+          "project": { "gid": "proj-001", "name": "Pet Feeder Roadmap" },
+          "section": { "gid": "sec-done", "name": "Done" }
+        }
+      ],
+      "tags": [{ "gid": "tag-alerting", "name": "alerting" }],
+      "custom_fields": [
+        {
+          "gid": "cf-prio",
+          "name": "Priority",
+          "type": "enum",
+          "enum_value": { "gid": "prio-low", "name": "Low" },
+          "display_value": "Low"
+        }
+      ]
+    }
+  ]
+}

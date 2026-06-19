@@ -18,6 +18,7 @@ import * as path from 'node:path';
 
 import { config } from '../lib/config.js';
 import { jiraFetch, listIssues, type JiraIssue } from '../adapters/jira.js';
+import { normalizeJiraIssue } from '../adapters/jira-normalize.js';
 import { createRecord, listRecords } from '../adapters/airtable.js';
 import { translateIssue } from '../grammars/project-management.js';
 import type { GrammarContext, TranslationResult } from '../grammars/types.js';
@@ -34,13 +35,13 @@ async function main() {
   const issues: JiraIssue[] = result.issues ?? [];
   console.log(`[translate] fetched ${issues.length} issue(s)`);
 
-  // Build grammar context: epic key → summary, plus customfield_* → display
-  // name so the schema-loss surface can name fields humanly and filter Jira's
-  // system custom fields.
-  const epicSummaryByKey = new Map<string, string>();
+  // Build parent-summary lookup (epics in PM context) + customfield_* →
+  // display name table the normalizer needs to identify project-specific
+  // custom fields by their human name.
+  const parentSummaryByKey = new Map<string, string>();
   for (const issue of issues) {
     if (issue.fields?.issuetype?.name === 'Epic') {
-      epicSummaryByKey.set(issue.key, issue.fields?.summary ?? issue.key);
+      parentSummaryByKey.set(issue.key, issue.fields?.summary ?? issue.key);
     }
   }
 
@@ -51,12 +52,12 @@ async function main() {
     if (fld.id.startsWith('customfield_')) customFieldNames.set(fld.id, fld.name);
   }
 
-  const ctx: GrammarContext = { epicSummaryByKey, customFieldNames };
+  const ctx: GrammarContext = { parentSummaryByKey };
 
   // Epics inform context but don't become Roadmap rows.
   const translatable = issues.filter((i) => i.fields?.issuetype?.name !== 'Epic');
   console.log(
-    `[translate] ${epicSummaryByKey.size} epic(s) used as context, ${translatable.length} non-Epic issue(s) to translate`,
+    `[translate] ${parentSummaryByKey.size} epic(s) used as context, ${translatable.length} non-Epic issue(s) to translate`,
   );
 
   // Friendly pre-flight warning if the destination already has rows —
@@ -75,7 +76,8 @@ async function main() {
   const enriched: Array<TranslationResult & { airtableRecordId: string | null }> = [];
 
   for (const issue of translatable) {
-    const tr = translateIssue(issue, ctx);
+    const normalized = normalizeJiraIssue(issue, { customFieldNames });
+    const tr = translateIssue(normalized, ctx);
     let recordId: string | null = null;
 
     if (!DRY_RUN) {

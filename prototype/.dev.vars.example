@@ -1,0 +1,7 @@
+# Wrangler reads this file as local-dev environment for the Worker.
+# Copy to `.dev.vars` (gitignored) and fill in your real key.
+#
+# Production binding is via `wrangler secret put ANTHROPIC_API_KEY`.
+# Leave unset to fall back to the deterministic keyword stub.
+
+ANTHROPIC_API_KEY=

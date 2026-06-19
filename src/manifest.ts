@@ -8,7 +8,13 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-import type { LossEntry, LossKind, TranslationResult } from './grammars/types.js';
+import type {
+  Conflict,
+  LossEntry,
+  LossKind,
+  ReverseTranslationResult,
+  TranslationResult,
+} from './grammars/types.js';
 
 export interface ManifestPass {
   /** ISO-8601 timestamp of the pass. */
@@ -23,6 +29,9 @@ export interface ManifestPass {
   projectKey: string;
   /** Whether destination writes were performed. */
   dryRun: boolean;
+  /** Direction of the pass. Defaults to `'forward'` when omitted. Reverse
+   *  passes emit `patches` and `conflicts` sections in addition to losses. */
+  direction?: 'forward' | 'reverse';
 }
 
 export interface Manifest {
@@ -31,10 +40,28 @@ export interface Manifest {
     issues: number;
     total: number;
     lossesByKind: Record<LossKind, number>;
+    /** Conflict count for reverse passes. Omitted for forward passes. */
+    conflicts?: number;
+    /** Per-record patch counts for reverse passes. Omitted for forward passes. */
+    patchedRecords?: number;
   };
   losslessFields: string[];
   losses: Array<LossEntry & { jiraKey: string }>;
   provenance: Array<{ jiraKey: string; airtableRecordId: string | null }>;
+  /** Reverse-pass output: per-record source-side patches. Forward passes
+   *  omit this field. */
+  patches?: Array<{
+    sourceKey: string;
+    sourcePatch: Record<string, unknown>;
+    applied: string[];
+    skipped: Array<{ field: string; reason: string }>;
+  }>;
+  /** Reverse-pass output: aggregate conflict list. Forward passes omit this. */
+  conflicts?: Conflict[];
+}
+
+export interface ReverseManifestEntry extends ReverseTranslationResult {
+  sourceKey: string;
 }
 
 const LOSS_KINDS: LossKind[] = [
@@ -70,7 +97,7 @@ export function buildManifest(
   }
 
   return {
-    pass,
+    pass: { ...pass, direction: pass.direction ?? 'forward' },
     counts: {
       issues: results.length,
       total: losses.length,
@@ -85,14 +112,65 @@ export function buildManifest(
   };
 }
 
+/**
+ * Build a reverse-pass manifest. `entries` is the per-record output of the
+ * reverse grammar; `provenance` carries the source-key ↔ destination-record
+ * mapping (typically read from the prior pass's snapshot).
+ */
+export function buildReverseManifest(
+  pass: ManifestPass,
+  entries: ReverseManifestEntry[],
+  provenance: Array<{ sourceKey: string; destRecordId: string }>,
+): Manifest {
+  const conflicts: Conflict[] = [];
+  let patchedRecords = 0;
+  for (const e of entries) {
+    conflicts.push(...e.conflicts);
+    if (Object.keys(e.sourcePatch).length > 0) patchedRecords++;
+  }
+  return {
+    pass: { ...pass, direction: 'reverse' },
+    counts: {
+      issues: entries.length,
+      total: 0,
+      lossesByKind: { schema: 0, semantic: 0, hierarchy: 0, context: 0, provenance: 0 },
+      conflicts: conflicts.length,
+      patchedRecords,
+    },
+    losslessFields: [],
+    losses: [],
+    provenance: provenance.map((p) => ({
+      jiraKey: p.sourceKey,
+      airtableRecordId: p.destRecordId,
+    })),
+    patches: entries.map((e) => ({
+      sourceKey: e.sourceKey,
+      sourcePatch: e.sourcePatch,
+      applied: e.applied,
+      skipped: e.skipped,
+    })),
+    conflicts,
+  };
+}
+
 // --- Render --------------------------------------------------------------
 
 export function renderMarkdown(m: Manifest): string {
   const lines: string[] = [];
 
-  lines.push(`# Translation manifest — ${m.pass.source} → ${m.pass.destination}`);
+  const arrow = m.pass.direction === 'reverse' ? '←' : '→';
+  const dryRunNote =
+    m.pass.direction === 'reverse'
+      ? m.pass.dryRun
+        ? ' (dry run — no source writes)'
+        : ''
+      : m.pass.dryRun
+      ? ' (dry run — no destination writes)'
+      : '';
+  lines.push(`# Translation manifest — ${m.pass.source} ${arrow} ${m.pass.destination}`);
   lines.push('');
-  lines.push(`**Pass:** ${m.pass.timestamp}${m.pass.dryRun ? ' (dry run — no destination writes)' : ''}`);
+  lines.push(`**Pass:** ${m.pass.timestamp}${dryRunNote}`);
+  lines.push(`**Direction:** ${m.pass.direction ?? 'forward'}`);
   lines.push(`**Source:** ${m.pass.source}, project \`${m.pass.projectKey}\``);
   lines.push(`**Destination:** ${m.pass.destination}`);
   lines.push(`**Context grammar:** \`${m.pass.context}\``);
@@ -101,56 +179,148 @@ export function renderMarkdown(m: Manifest): string {
   // --- Summary
   lines.push('## Summary');
   lines.push('');
-  lines.push(`- ${m.counts.issues} issue(s) translated.`);
-  lines.push(`- ${m.counts.total} loss(es) surfaced across the five-kind taxonomy:`);
-  for (const k of LOSS_KINDS) {
-    lines.push(`  - ${capitalize(k)}: ${m.counts.lossesByKind[k]}`);
-  }
-  lines.push('');
-
-  // --- Lossless mappings
-  lines.push('## Lossless mappings');
-  lines.push('');
-  if (m.losslessFields.length === 0) {
-    lines.push('_(none observed in this pass.)_');
+  const isReverse = m.pass.direction === 'reverse';
+  if (isReverse) {
+    lines.push(`- ${m.counts.issues} record(s) compared against the prior snapshot.`);
+    lines.push(`- ${m.counts.patchedRecords ?? 0} record(s) would receive a source-side patch.`);
+    lines.push(`- ${m.counts.conflicts ?? 0} conflict(s) surfaced (both sides moved since last pass).`);
+    if (m.counts.total > 0) {
+      lines.push(`- ${m.counts.total} reverse-pass loss(es) (round-trip semantic distance):`);
+      for (const k of LOSS_KINDS) {
+        if (m.counts.lossesByKind[k] > 0) {
+          lines.push(`  - ${capitalize(k)}: ${m.counts.lossesByKind[k]}`);
+        }
+      }
+    }
   } else {
-    lines.push('Mapped 1:1 with no semantic distance:');
-    lines.push('');
-    for (const f of m.losslessFields) lines.push(`- \`${f}\``);
+    lines.push(`- ${m.counts.issues} issue(s) translated.`);
+    lines.push(`- ${m.counts.total} loss(es) surfaced across the five-kind taxonomy:`);
+    for (const k of LOSS_KINDS) {
+      lines.push(`  - ${capitalize(k)}: ${m.counts.lossesByKind[k]}`);
+    }
   }
   lines.push('');
 
-  // --- Losses by kind
-  lines.push('## Losses by kind');
-  lines.push('');
-  for (const kind of LOSS_KINDS) {
-    const ofKind = m.losses.filter((l) => l.kind === kind);
-    lines.push(`### ${capitalize(kind)} (${ofKind.length})`);
+  // --- Forward-only sections: lossless mappings + losses by kind.
+  if (!isReverse) {
+    lines.push('## Lossless mappings');
+    lines.push('');
+    if (m.losslessFields.length === 0) {
+      lines.push('_(none observed in this pass.)_');
+    } else {
+      lines.push('Mapped 1:1 with no semantic distance:');
+      lines.push('');
+      for (const f of m.losslessFields) lines.push(`- \`${f}\``);
+    }
     lines.push('');
 
-    if (ofKind.length === 0) {
-      lines.push(emptyKindHint(kind));
+    lines.push('## Losses by kind');
+    lines.push('');
+    for (const kind of LOSS_KINDS) {
+      const ofKind = m.losses.filter((l) => l.kind === kind);
+      lines.push(`### ${capitalize(kind)} (${ofKind.length})`);
       lines.push('');
-      continue;
+
+      if (ofKind.length === 0) {
+        lines.push(emptyKindHint(kind));
+        lines.push('');
+        continue;
+      }
+
+      const byField = groupBy(ofKind, (l) => l.field);
+      for (const [field, entries] of byField) {
+        const exemplar = entries[0];
+        lines.push(`#### \`${field}\``);
+        lines.push('');
+        lines.push(`- **Distance:** ${exemplar.distance}`);
+        lines.push(`- **Resolution:** \`${exemplar.resolution}\``);
+        lines.push(`- **Affected issues (${entries.length}):**`);
+        for (const e of entries) lines.push(`  - \`${e.jiraKey}\` → ${renderDestination(e.destination)}`);
+        lines.push('');
+      }
+    }
+  }
+
+  // --- Reverse-pass sections (patches + conflicts) -----------------------
+  if (m.pass.direction === 'reverse') {
+    lines.push('## Reverse-pass patches');
+    lines.push('');
+    const patches = m.patches ?? [];
+    const withPatch = patches.filter((p) => Object.keys(p.sourcePatch).length > 0);
+    if (withPatch.length === 0) {
+      lines.push('_No source-side patches generated this pass — no destination edits to round-trip._');
+    } else {
+      lines.push(`${withPatch.length} record(s) would receive a source-side patch (dry run — no live writes performed):`);
+      lines.push('');
+      for (const p of withPatch) {
+        lines.push(`#### \`${p.sourceKey}\``);
+        lines.push('');
+        lines.push('- **Applied:** ' + (p.applied.length === 0 ? '_(none)_' : p.applied.map((f) => `\`${f}\``).join(', ')));
+        lines.push('- **Patch:**');
+        lines.push('');
+        lines.push('  ```json');
+        for (const line of JSON.stringify(p.sourcePatch, null, 2).split('\n')) {
+          lines.push('  ' + line);
+        }
+        lines.push('  ```');
+        lines.push('');
+      }
     }
 
-    const byField = groupBy(ofKind, (l) => l.field);
-    for (const [field, entries] of byField) {
-      const exemplar = entries[0];
-      lines.push(`#### \`${field}\``);
+    // Skipped fields aggregated
+    const skippedByReason = new Map<string, Array<{ sourceKey: string; field: string }>>();
+    for (const p of patches) {
+      for (const s of p.skipped) {
+        const list = skippedByReason.get(s.reason) ?? [];
+        list.push({ sourceKey: p.sourceKey, field: s.field });
+        skippedByReason.set(s.reason, list);
+      }
+    }
+    if (skippedByReason.size > 0) {
+      lines.push('## Reverse-pass skipped fields');
       lines.push('');
-      lines.push(`- **Distance:** ${exemplar.distance}`);
-      lines.push(`- **Resolution:** \`${exemplar.resolution}\``);
-      lines.push(`- **Affected issues (${entries.length}):**`);
-      for (const e of entries) lines.push(`  - \`${e.jiraKey}\` → ${renderDestination(e.destination)}`);
+      lines.push('Field-level round-trips the grammar refused, with reasons. Skipped is not the same as conflicted — these are choices, not collisions.');
       lines.push('');
+      for (const [reason, entries] of skippedByReason) {
+        lines.push(`- **${reason}**`);
+        const byField = groupBy(entries, (e) => e.field);
+        for (const [field, fs] of byField) {
+          const keys = fs.map((f) => `\`${f.sourceKey}\``).join(', ');
+          lines.push(`  - \`${field}\` — ${fs.length} record(s): ${keys}`);
+        }
+      }
+      lines.push('');
+    }
+
+    // Conflicts section
+    lines.push('## Conflicts');
+    lines.push('');
+    const conflicts = m.conflicts ?? [];
+    if (conflicts.length === 0) {
+      lines.push('_No conflicts detected. All destination edits round-tripped cleanly or were skipped by policy._');
+    } else {
+      lines.push(`${conflicts.length} conflict(s) detected. The engine does not auto-resolve — downstream tooling or a human picks.`);
+      lines.push('');
+      const byField = groupBy(conflicts, (c) => c.field);
+      for (const [field, list] of byField) {
+        lines.push(`#### \`${field}\` (${list.length})`);
+        lines.push('');
+        for (const c of list) {
+          lines.push(`- \`${c.sourceKey}\`:`);
+          lines.push(`  - **Last snapshot:** ${renderDestination(c.lastSnapshot)}`);
+          lines.push(`  - **Source now:** ${renderDestination(c.sourceCurrent)}`);
+          lines.push(`  - **Destination now:** ${renderDestination(c.destCurrent)}`);
+          if (c.notes) lines.push(`  - **Notes:** ${c.notes}`);
+        }
+        lines.push('');
+      }
     }
   }
 
   // --- Provenance
   lines.push('## Bidirectional ID mapping');
   lines.push('');
-  lines.push('| Jira Key | Airtable Record ID |');
+  lines.push('| Source Key | Destination Record ID |');
   lines.push('|---|---|');
   for (const p of m.provenance) {
     const rid = p.airtableRecordId

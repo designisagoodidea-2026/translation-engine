@@ -2,6 +2,9 @@
 .env
 .env.local
 .env.*.local
+# Wrangler local secrets for the prototype Worker
+.dev.vars
+**/.dev.vars
 
 # Personal drafts and working docs (not part of the shipped artifact —
 # reference Chief of Staff / internal context that stays out of public).

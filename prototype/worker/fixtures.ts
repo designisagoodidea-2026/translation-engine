@@ -30,7 +30,7 @@ export const PAIR = {
   },
   destinationFields: [
     'Name', 'Description', 'Status', 'Priority', 'Assignee',
-    'Epic', 'Labels', 'Due', 'Sprint', 'Fix Version', 'Jira Key',
+    'Epic', 'Labels', 'Due', 'Sprint', 'Fix Version', 'Source Key',
   ],
 };
 
@@ -43,8 +43,10 @@ export const CUSTOM_FIELD_NAMES = new Map<string, string>([
   ['customfield_10100', 'Customer Segment'],
 ]);
 
-// Epic key → summary map (grammar context).
-export const EPIC_SUMMARIES = new Map<string, string>([
+// Parent (Epic) key → summary map. Passed into the grammar as
+// `parentSummaryByKey` so the parent→Epic hierarchy-loss row can carry the
+// human-readable epic name instead of just the key.
+export const PARENT_SUMMARIES = new Map<string, string>([
   ['SCRUM-2', 'Pet feeder hardware integration'],
   ['SCRUM-3', 'Mobile app — feed scheduling UX'],
   ['SCRUM-4', 'Cloud telemetry + alerts'],

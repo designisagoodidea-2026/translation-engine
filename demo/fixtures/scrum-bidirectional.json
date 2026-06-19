@@ -1,0 +1,260 @@
+{
+  "_comment": "Synthetic bidirectional fixture for slice 2. Three sections: (1) snapshot from a hypothetical prior forward pass, (2) current Jira state at reverse-pass time, (3) current Airtable state at reverse-pass time. The five records below exercise each case the reverse-translate function handles: no change, dest-only delta, source-only delta, conflict, and a labels delta.",
+  "snapshot": {
+    "pairId": "jira-cloud:SCRUM-airtable:Roadmap",
+    "lastPass": "2026-06-03T18:00:00Z",
+    "records": [
+      {
+        "sourceKey": "SCRUM-5",
+        "destRecordId": "rec-scrum-5",
+        "lastSource": {
+          "summary": "Bluetooth pairing flow",
+          "description": "Spec lives in this Slack thread: https://acme.slack.com/archives/C0HARDWARE/p1700000000001",
+          "priority": "High",
+          "dueDate": null,
+          "labels": ["hardware"]
+        },
+        "lastDest": {
+          "Name": "Bluetooth pairing flow",
+          "Description": "Spec lives in this Slack thread: https://acme.slack.com/archives/C0HARDWARE/p1700000000001",
+          "Priority": "High",
+          "Due": null,
+          "Labels": ["hardware"]
+        }
+      },
+      {
+        "sourceKey": "SCRUM-6",
+        "destRecordId": "rec-scrum-6",
+        "lastSource": {
+          "summary": "Battery telemetry endpoint",
+          "description": null,
+          "priority": "Medium",
+          "dueDate": null,
+          "labels": ["hardware", "telemetry"]
+        },
+        "lastDest": {
+          "Name": "Battery telemetry endpoint",
+          "Description": null,
+          "Priority": "Medium",
+          "Due": null,
+          "Labels": ["hardware", "telemetry"]
+        }
+      },
+      {
+        "sourceKey": "SCRUM-8",
+        "destRecordId": "rec-scrum-8",
+        "lastSource": {
+          "summary": "Schedule editor screen",
+          "description": "Owners build a daily feeding schedule from the mobile app.",
+          "priority": "High",
+          "dueDate": null,
+          "labels": ["mobile", "ux"]
+        },
+        "lastDest": {
+          "Name": "Schedule editor screen",
+          "Description": "Owners build a daily feeding schedule from the mobile app.",
+          "Priority": "High",
+          "Due": null,
+          "Labels": ["mobile", "ux"]
+        }
+      },
+      {
+        "sourceKey": "SCRUM-12",
+        "destRecordId": "rec-scrum-12",
+        "lastSource": {
+          "summary": "Feed event ingest worker",
+          "description": null,
+          "priority": "High",
+          "dueDate": null,
+          "labels": ["cloud", "telemetry"]
+        },
+        "lastDest": {
+          "Name": "Feed event ingest worker",
+          "Description": null,
+          "Priority": "High",
+          "Due": null,
+          "Labels": ["cloud", "telemetry"]
+        }
+      },
+      {
+        "sourceKey": "SCRUM-15",
+        "destRecordId": "rec-scrum-15",
+        "lastSource": {
+          "summary": "Anomaly dashboard prototype",
+          "description": null,
+          "priority": "Medium",
+          "dueDate": null,
+          "labels": ["cloud", "dashboard"]
+        },
+        "lastDest": {
+          "Name": "Anomaly dashboard prototype",
+          "Description": null,
+          "Priority": "Medium",
+          "Due": null,
+          "Labels": ["cloud", "dashboard"]
+        }
+      }
+    ]
+  },
+  "currentJira": {
+    "issues": [
+      {
+        "id": "10005",
+        "key": "SCRUM-5",
+        "fields": {
+          "summary": "Bluetooth pairing flow",
+          "description": {
+            "type": "doc",
+            "version": 1,
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  { "type": "text", "text": "Spec lives in this Slack thread: https://acme.slack.com/archives/C0HARDWARE/p1700000000001" }
+                ]
+              }
+            ]
+          },
+          "status": { "name": "Active" },
+          "priority": { "name": "High" },
+          "assignee": null,
+          "parent": null,
+          "labels": ["hardware"],
+          "duedate": null,
+          "issuetype": { "name": "Task" }
+        }
+      },
+      {
+        "id": "10006",
+        "key": "SCRUM-6",
+        "fields": {
+          "summary": "Battery telemetry endpoint",
+          "description": null,
+          "status": { "name": "Active" },
+          "priority": { "name": "High" },
+          "assignee": null,
+          "parent": null,
+          "labels": ["hardware", "telemetry"],
+          "duedate": null,
+          "issuetype": { "name": "Task" }
+        }
+      },
+      {
+        "id": "10008",
+        "key": "SCRUM-8",
+        "fields": {
+          "summary": "Schedule editor screen",
+          "description": {
+            "type": "doc",
+            "version": 1,
+            "content": [
+              { "type": "paragraph", "content": [{ "type": "text", "text": "Owners build a daily feeding schedule from the mobile app." }] }
+            ]
+          },
+          "status": { "name": "Active" },
+          "priority": { "name": "High" },
+          "assignee": null,
+          "parent": null,
+          "labels": ["mobile", "ux"],
+          "duedate": null,
+          "issuetype": { "name": "Task" }
+        }
+      },
+      {
+        "id": "10012",
+        "key": "SCRUM-12",
+        "fields": {
+          "summary": "Feed event ingest worker",
+          "description": null,
+          "status": { "name": "Complete" },
+          "priority": { "name": "Low" },
+          "assignee": null,
+          "parent": null,
+          "labels": ["cloud", "telemetry"],
+          "duedate": null,
+          "issuetype": { "name": "Task" }
+        }
+      },
+      {
+        "id": "10015",
+        "key": "SCRUM-15",
+        "fields": {
+          "summary": "Anomaly dashboard prototype",
+          "description": null,
+          "status": { "name": "Backlog" },
+          "priority": { "name": "Medium" },
+          "assignee": null,
+          "parent": null,
+          "labels": ["cloud", "dashboard"],
+          "duedate": null,
+          "issuetype": { "name": "Task" }
+        }
+      }
+    ]
+  },
+  "currentAirtable": {
+    "records": [
+      {
+        "id": "rec-scrum-5",
+        "fields": {
+          "Name": "Bluetooth pairing flow",
+          "Description": "Spec lives in this Slack thread: https://acme.slack.com/archives/C0HARDWARE/p1700000000001",
+          "Priority": "High",
+          "Due": "2026-07-15",
+          "Labels": ["hardware"],
+          "Status": "In Progress",
+          "Source Key": "SCRUM-5"
+        }
+      },
+      {
+        "id": "rec-scrum-6",
+        "fields": {
+          "Name": "Battery telemetry endpoint",
+          "Description": null,
+          "Priority": "Medium",
+          "Due": null,
+          "Labels": ["hardware", "telemetry"],
+          "Status": "In Progress",
+          "Source Key": "SCRUM-6"
+        }
+      },
+      {
+        "id": "rec-scrum-8",
+        "fields": {
+          "Name": "Schedule editor screen",
+          "Description": "Owners build a daily feeding schedule from the mobile app. Scope expanded 2026-06-03: includes per-pet portion-size overrides.",
+          "Priority": "High",
+          "Due": null,
+          "Labels": ["mobile", "ux"],
+          "Status": "In Progress",
+          "Source Key": "SCRUM-8"
+        }
+      },
+      {
+        "id": "rec-scrum-12",
+        "fields": {
+          "Name": "Feed event ingest worker",
+          "Description": null,
+          "Priority": "Medium",
+          "Due": null,
+          "Labels": ["cloud", "telemetry"],
+          "Status": "Done",
+          "Source Key": "SCRUM-12"
+        }
+      },
+      {
+        "id": "rec-scrum-15",
+        "fields": {
+          "Name": "Anomaly dashboard prototype",
+          "Description": null,
+          "Priority": "Medium",
+          "Due": null,
+          "Labels": ["cloud", "dashboard", "v2"],
+          "Status": "To Do",
+          "Source Key": "SCRUM-15"
+        }
+      }
+    ]
+  },
+  "fields": []
+}

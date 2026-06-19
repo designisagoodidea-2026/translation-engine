@@ -1,6 +1,6 @@
 {
   "name": "translation-engine",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Schema-translation library for heterogeneous tracking systems (design + cross-functional).",
   "type": "module",
   "private": true,
@@ -10,6 +10,10 @@
     "seed:jira": "tsx src/scripts/seed-jira.ts",
     "fix:statuses": "tsx src/scripts/fix-statuses.ts",
     "translate": "tsx src/scripts/translate.ts",
+    "translate:from-fixture": "tsx src/scripts/translate-from-fixture.ts",
+    "translate:dsops": "tsx src/scripts/translate-from-fixture.ts --fixture demo/fixtures/dsops-jira-issues.json --source jira --grammar dsops --project DS",
+    "translate:asana-pm": "tsx src/scripts/translate-from-fixture.ts --fixture demo/fixtures/asana-pm-tasks.json --source asana --grammar pm --project FEEDER",
+    "translate:reverse": "tsx src/scripts/translate-reverse-from-fixture.ts --fixture demo/fixtures/scrum-bidirectional.json --project SCRUM",
     "wipe:airtable": "tsx src/scripts/wipe-airtable.ts",
     "typecheck": "tsc --noEmit"
   },

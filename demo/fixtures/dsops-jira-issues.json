@@ -1,0 +1,183 @@
+{
+  "_comment": "Synthetic Jira-issue-shape input for the design-system-ops grammar. Same pet-feeder pretend product as the rest of the public artifact. No live Jira data here. Five issues + one parent family, sized to exercise the DSOps loss surface (Figma URL context loss, Storybook URL context loss, design-token schema loss, paired-ownership provenance loss, lifecycle semantic loss, custom-field schema loss).",
+  "issues": [
+    {
+      "id": "20001",
+      "key": "DS-1",
+      "fields": {
+        "summary": "Feeder buttons",
+        "issuetype": { "name": "Pattern" },
+        "status": { "name": "Stable" }
+      }
+    },
+    {
+      "id": "20002",
+      "key": "DS-2",
+      "fields": {
+        "summary": "FeedButton",
+        "issuetype": { "name": "Component" },
+        "status": { "name": "Stable" },
+        "priority": { "name": "Medium" },
+        "assignee": { "accountId": "acc-aiko-91", "displayName": "Aiko Tanaka" },
+        "parent": { "key": "DS-1", "fields": { "summary": "Feeder buttons" } },
+        "labels": ["touch", "primary-action"],
+        "duedate": null,
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Primary action used on the schedule editor and the manual-feed screen. Uses theme.color.primary.500 for fill and theme.space.md for inset; respects --feeder-radius-lg for the rounded corner."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Design ref: https://www.figma.com/design/aB12CdEf/feeder-design-system?node-id=204-119. Storybook page: https://storybook.designisagoodidea.com/?path=/story/components-feedbutton--default."
+                }
+              ]
+            }
+          ]
+        },
+        "customfield_10081": { "value": "Hiro Sato" }
+      }
+    },
+    {
+      "id": "20003",
+      "key": "DS-3",
+      "fields": {
+        "summary": "color.primary palette refresh",
+        "issuetype": { "name": "Token" },
+        "status": { "name": "Beta" },
+        "priority": { "name": "Low" },
+        "assignee": { "accountId": "acc-jamie-12", "displayName": "Jamie Park" },
+        "parent": { "key": "DS-1", "fields": { "summary": "Feeder buttons" } },
+        "labels": ["color", "tokens"],
+        "duedate": "2026-07-15",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Rebalances theme.color.primary.300 through theme.color.primary.700 to improve contrast on dim-room photos of the feeder hardware. Affects FeedButton, ScheduleCard, and the StatusPill family. CSS custom property names (--feeder-color-primary-500, --feeder-color-primary-700) stay; values shift."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Design ref: https://www.figma.com/design/aB12CdEf/feeder-design-system?node-id=302-441."
+                }
+              ]
+            }
+          ]
+        },
+        "customfield_10082": { "value": "Pending — review scheduled 2026-06-12" }
+      }
+    },
+    {
+      "id": "20004",
+      "key": "DS-4",
+      "fields": {
+        "summary": "AnomalyCard",
+        "issuetype": { "name": "Component" },
+        "status": { "name": "Experimental" },
+        "priority": null,
+        "assignee": { "accountId": "acc-aiko-91", "displayName": "Aiko Tanaka" },
+        "parent": null,
+        "labels": ["dashboard", "alerting"],
+        "duedate": null,
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Surface card for missed-feed and battery-low alerts on the owner dashboard. Spike — props and a11y model are not yet stable. No Storybook yet."
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "20005",
+      "key": "DS-5",
+      "fields": {
+        "summary": "OldPairingDialog",
+        "issuetype": { "name": "Component" },
+        "status": { "name": "Deprecated" },
+        "priority": null,
+        "assignee": { "accountId": "acc-hiro-04", "displayName": "Hiro Sato" },
+        "parent": null,
+        "labels": ["pairing", "legacy"],
+        "duedate": null,
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Pre-v2 pairing modal. Replaced by the inline PairingFlow shipped in 2026-04. Kept in Storybook for one quarter to support apps still on the legacy SDK. Remove from the design system after 2026-07-01."
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "20006",
+      "key": "DS-6",
+      "fields": {
+        "summary": "Pairing UX guideline — bluetooth-first, fallback to QR",
+        "issuetype": { "name": "Guideline" },
+        "status": { "name": "Stable" },
+        "priority": null,
+        "assignee": { "accountId": "acc-jamie-12", "displayName": "Jamie Park" },
+        "parent": null,
+        "labels": ["pairing", "guideline"],
+        "duedate": null,
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Default pairing flow is Bluetooth, falling back to QR if Bluetooth permission is denied. Owners on iOS 16+ have a known issue with the permission prompt; surface --feeder-color-warning-500 inline rather than as a separate dialog."
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "fields": [
+    { "id": "customfield_10081", "name": "Engineering Owner" },
+    { "id": "customfield_10082", "name": "A11y Audit Status" }
+  ]
+}
